@@ -1,12 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import snap
-import time
 import random
-from tqdm import tqdm
+from multiprocessing import Pool
 
 threshold = 2
-
+G = snap.LoadEdgeList(snap.PUNGraph, "ca-GrQc.txt", 0, 1) # Caricamento del grafo
 
 def random_threshold():
     # Generazione di un numero intero casuale
@@ -29,11 +28,9 @@ def to_map_threshold(G, threshold=random_threshold()):
 
 
 def main():
-    start_time = time.time()
-
+    seedset_list = [12,25,50,100,200,300,400,500]
+    
     np.random.seed()
-
-    G = snap.LoadEdgeList(snap.PUNGraph, "ca-GrQc.txt", 0, 1)
     deg = [v.GetDeg() for v in G.Nodes()]
     ##Statistiche del grafo
     print("Numero di nodi: ", G.GetNodes())
@@ -63,16 +60,111 @@ def main():
     print("Numero di archi positivi: ", len(edgePositivi))
     print("Numero di archi negativi: ", len(edgeNegativi))
 
-    # S = seeds_greedy_degree_max(G, edgePositivi)
-    S = tts(G)
-    print("finito tts")
-    infezione = activationFunction(G, S, edgePositivi, edgeNegativi, threshold)
-    print("Numero di nodi infetti: ", len(infezione))
-    print("Grafo infetti: ", infezione)
-
-
+    parallel_seeds_greedy_difference_max(seedset_list,edgePositivi, edgeNegativi, threshold)
+    parallel_randomWalk(seedset_list, edgePositivi, edgeNegativi)
+    parallel_tts(seedset_list,edgePositivi, edgeNegativi)
+    
+        
 #################
+def parallel_seeds_greedy_difference_max(seedset_list,edgePositivi, edgeNegativi, threshold):
+    avg = []
+    
+    process_num = len(seedset_list)
+    # Creazione degli argomenti per ogni iterazione
+    args = [(edgePositivi, edgeNegativi, threshold, seed) for seed in seedset_list]
+    # Creazione del pool di processi
+    pool = Pool(processes=process_num)
+    avg = pool.starmap(test_seeds_greedy_difference_max, args)
+ 
+    # Chiusura del pool
+    pool.close() 
+             
+    draw_avg(avg, seedset_list,"seeds_greedy_difference_max")
+def parallel_randomWalk(seedset_list, edgePositivi, edgeNegativi):
+    avg = []
+    
+    process_num = len(seedset_list)
+    # Creazione degli argomenti per ogni iterazione
+    args = [(seed, edgePositivi, edgeNegativi) for seed in seedset_list]
+    # Creazione del pool di processi
+    pool = Pool(processes=process_num)
+    avg = pool.starmap(test_randomWalk, args)
+ 
+    # Chiusura del pool
+    pool.close() 
+             
+    draw_avg(avg, seedset_list,"randomWalk")
+def parallel_tts(seedset_list,edgePositivi, edgeNegativi):
+    avg = []
+    
+    process_num = len(seedset_list)
+    # Creazione degli argomenti per ogni iterazione
+    args = [(seed,edgePositivi,edgeNegativi) for seed in seedset_list]
+    # Creazione del pool di processi
+    pool = Pool(processes=process_num)
+    
+    avg = pool.starmap(test_tts, args)
+ 
+    # Chiusura del pool
+    pool.close() 
+             
+    draw_avg(avg, seedset_list,"tts")
+    
+# Funzione per il disegno del grafico medie
+def draw_avg(avg, seedset_list,graph_name):
+    plt.plot(seedset_list, avg, '--b')  # Linea blu
+    plt.plot(seedset_list, avg, 'ro')   # Puntini rossi
+    plt.xlabel("Seedset",)
+    plt.ylabel("Numero medio di nodi infetti")
+    plt.title(graph_name.upper())
+    
+    assex= seedset_list
+    plt.xticks(assex)
+    
+    assey= avg
+    plt.yticks(assey)
 
+    plt.savefig("grafici/"+graph_name+".png")
+
+def test_seeds_greedy_difference_max(edgePositivi, edgeNegativi, threshold, k):
+    infectedList = []
+    for i in range(10):
+            S = seeds_greedy_difference_max(G, edgePositivi, edgeNegativi, threshold, k)
+            print("Iterazione ",i," Grandezza del seed set: ", len(S))
+            infezione = activationFunction(G, S, edgePositivi, edgeNegativi, threshold)
+            print("Numero di nodi infetti: ", len(infezione),"\n")
+            #print("Nodi infetti: ", infezione)
+            
+            infectedList.append(len(infezione))
+    avg = np.mean(infectedList)
+    return avg
+    
+# Funzione per testare l'algoritmo random walk
+def test_randomWalk(seedset, edgePositivi, edgeNegativi):
+    infectedList = []
+    for i in range(10):
+            S = probabilistic_random_walk(G, seedset, 10)
+            print("Iterazione ",i," Grandezza del seed set: ", len(S))
+            infezione = activationFunction(G, S, edgePositivi, edgeNegativi, threshold)
+            print("Numero di nodi infetti: ", len(infezione),"\n")
+            #print("Nodi infetti: ", infezione)
+            
+            infectedList.append(len(infezione))
+    avg = np.mean(infectedList)
+    return avg 
+
+# Funzione per testare l'algoritmo tts
+def test_tts(seed,edgePositivi, edgeNegativi):
+    infected_list = []
+    for i in range(10):
+        S = tts(G,seed)
+        infezione = activationFunction(G, S, edgePositivi, edgeNegativi, threshold)
+        print("Numero di nodi infetti: ", len(infezione),"\n")
+        #print("Nodi infetti: ", infezione)
+        
+        infected_list.append(len(infezione))
+    avg = np.mean(infected_list)
+    return avg
 
 # Calcolo della probabilità p(u, v)
 def compute_probability(G, u, v):
@@ -163,7 +255,7 @@ def seeds_greedy_residual_degree_max(G, edgePositivi):
     return S
 
 
-def seeds_greedy_difference_max(G, edgePositivi, edgeNegativi, threshold):
+def seeds_greedy_difference_max(G, edgePositivi, edgeNegativi, threshold, k):
     # Calcola il numero di adiacenti positivi e negativi per ogni nodo
     positive_counts = {}
     negative_counts = {}
@@ -178,7 +270,7 @@ def seeds_greedy_difference_max(G, edgePositivi, edgeNegativi, threshold):
         negative_counts[u] = negative_counts.get(u, 0) + 1
         negative_counts[v] = negative_counts.get(v, 0) + 1
 
-    k = 10  # Dimensione del seed set
+    # k è la dimensione del seed set
     S = []  # Seed set inizialmente vuoto
 
     while len(S) < k:
@@ -223,6 +315,82 @@ def seeds_greedy_difference_max(G, edgePositivi, edgeNegativi, threshold):
     return S
 
 
+def tts(G,k):
+    """
+    Imposta S=0
+    Finche ci sono Nodi nel Grafo
+        se il nodo ha threshold 0
+           per ogni vicino del nodo: decrementa threshold, decrementa il grado, cancellalo dai vicini
+        altrimenti
+           se esiste un nodo tale che il grado è minore della thresh
+               aggiungilo al seedset
+               decrementa threshold, decrementa il grado, cancellalo dai vicini
+           altrimenti
+               prendi v con il ratio piu grande( threshold del nodo/grado * grado+1)
+               elimina questo nodo che hai preso
+       Togli v da insieme V"""
+    Grafo = snap.ConvertGraph(type(G), G)
+    thresholdNodes = to_map_threshold(Grafo,2)
+    S = []
+    while Grafo.GetNodes() != 0:
+        deletedNode = None
+        for node in Grafo.Nodes():
+            if thresholdNodes.get(node.GetId()) == 0:
+                for neighbor in node.GetOutEdges():
+                    thresholdNodes[neighbor] = (
+                        thresholdNodes[neighbor] - 1
+                        if thresholdNodes[neighbor] - 1 > 0
+                        else 0
+                    )
+                deletedNode = node.GetId()
+                Grafo.DelNode(deletedNode)
+            else:
+                if node.GetOutDeg() < thresholdNodes[node.GetId()]:
+                    S.append(node.GetId())
+                    for neighbor in node.GetOutEdges():
+                        thresholdNodes[neighbor] = (
+                            thresholdNodes[neighbor] - 1
+                            if thresholdNodes[neighbor] - 1 > 0
+                            else 0
+                        )
+                    deletedNode = node.GetId()
+                    Grafo.DelNode(deletedNode)
+        if deletedNode is None:
+            max_ratio = -1
+            for v in Grafo.Nodes():
+                ratio = thresholdNodes[v.GetId()] / (v.GetOutDeg() * v.GetOutDeg() + 1)
+                if ratio > max_ratio:
+                    max_ratio = ratio
+                    max_ratio_node = v.GetId()
+                    Grafo.DelNode(max_ratio_node)
+                    
+    # Prendi i primi k nodi all'interno di S
+    #print("PRIMA " + str(S))
+    S = S[:k]
+    #print("\n\nDOPO " + str(S))
+    return S
+
+
+def probabilistic_random_walk(G, k, steps):
+    S = []  # Seed Set inizialmente vuoto
+    for _ in range(k):  # Ripeti k volte, dove k è la dimensione del Seed Set
+        node_id = G.GetRndNId()  # Selezione casuale di un nodo iniziale
+        visited = set()  # Insieme dei nodi visitati durante il random walk
+        for _ in range(steps):  # Ripeti steps volte, dove steps è il numero di passi del random walk
+            visited.add(node_id)  # Aggiungi l'ID del nodo corrente all'insieme dei visitati
+
+            node = G.GetNI(node_id)
+            neighbors = [node.GetOutNId(e) for e in range(node.GetOutDeg())]  # Ottieni gli ID dei nodi vicini
+            if not neighbors:
+                break  # Se il nodo non ha vicini, termina il random walk
+
+            node_id = random.choice(neighbors)  # Scegli un ID di nodo vicino casuale come prossimo nodo
+
+        S.append(node_id)  # Aggiungi l'ultimo nodo visitato al Seed Set
+
+    return S
+
+
 def activationFunction(G, S, edgePositivi, edgeNegativi, threshold):
     # definire Insieme degli infetti al tempo t e al tempo t-1
     # Ciclare finché infectedT!=infectedT1
@@ -231,7 +399,6 @@ def activationFunction(G, S, edgePositivi, edgeNegativi, threshold):
 
     infectedT = []  # Inizializzo l'insieme degli infetti al tempo t
     infectedT1 = S  # Inizializzo l'insieme degli infetti con il seed set #Insieme degli infetti al tempo t-1
-
     notInfected = []
     for node in G.Nodes():
         if node.GetId() not in infectedT1:
@@ -263,57 +430,6 @@ def activationFunction(G, S, edgePositivi, edgeNegativi, threshold):
                 infectedT1.append(v)
 
     return infectedT1
-
-
-def tts(G):
-    """
-    Imposta S=0
-    Finche ci sono Nodi nel Grafo
-        se il nodo ha threshold 0
-           per ogni vicino del nodo: decrementa threshold, decrementa il grado, cancellalo dai vicini
-        altrimenti
-           se esiste un nodo tale che il grado è minore della thresh
-               aggiungilo al seedset
-               decrementa threshold, decrementa il grado, cancellalo dai vicini
-           altrimenti
-               prendi v con il ratio piu grande( threshold del nodo/grado * grado+1)
-               elimina questo nodo che hai preso
-       Togli v da insieme V"""
-    thresholdNodes = to_map_threshold(G, threshold=random_threshold())
-    S = []
-    while G.GetNodes() != 0:
-        deletedNode = None
-        for node in G.Nodes():
-            if thresholdNodes.get(node.GetId()) == 0:
-                for neighbor in node.GetOutEdges():
-                    thresholdNodes[neighbor] = (
-                        thresholdNodes[neighbor] - 1
-                        if thresholdNodes[neighbor] - 1 > 0
-                        else 0
-                    )
-                deletedNode = node.GetId()
-                G.DelNode(deletedNode)
-            else:
-                if node.GetOutDeg() < thresholdNodes[node.GetId()]:
-                    S.append(node.GetId())
-                    for neighbor in node.GetOutEdges():
-                        thresholdNodes[neighbor] = (
-                            thresholdNodes[neighbor] - 1
-                            if thresholdNodes[neighbor] - 1 > 0
-                            else 0
-                        )
-                    deletedNode = node.GetId()
-                    G.DelNode(deletedNode)
-        if deletedNode is None:
-            max_ratio = -1
-            for v in G.Nodes():
-                ratio = thresholdNodes[v.GetId()] / (v.GetOutDeg() * v.GetOutDeg() + 1)
-                if ratio > max_ratio:
-                    max_ratio = ratio
-                    max_ratio_node = v.GetId()
-                    G.DelNode(max_ratio_node)
-
-    return S
 
 
 def draw_Graph(G):
