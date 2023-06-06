@@ -60,8 +60,8 @@ def main():
     print("Numero di archi positivi: ", len(edgePositivi))
     print("Numero di archi negativi: ", len(edgeNegativi))
 
-    parallel_seeds_greedy_difference_max(seedset_list,edgePositivi, edgeNegativi, threshold)
-    parallel_randomWalk(seedset_list, edgePositivi, edgeNegativi)
+    #parallel_seeds_greedy_difference_max(seedset_list,edgePositivi, edgeNegativi, threshold)
+    #parallel_randomWalk(seedset_list, edgePositivi, edgeNegativi)
     parallel_tts(seedset_list,edgePositivi, edgeNegativi)
     
         
@@ -143,7 +143,7 @@ def test_seeds_greedy_difference_max(edgePositivi, edgeNegativi, threshold, k):
 def test_randomWalk(seedset, edgePositivi, edgeNegativi):
     infectedList = []
     for i in range(10):
-            S = probabilistic_random_walk(G, seedset, 10)
+            S = random_walk(G, seedset, 10)
             print("Iterazione ",i," Grandezza del seed set: ", len(S))
             infezione = activationFunction(G, S, edgePositivi, edgeNegativi, threshold)
             print("Numero di nodi infetti: ", len(infezione),"\n")
@@ -371,22 +371,31 @@ def tts(G,k):
     return S
 
 
-def probabilistic_random_walk(G, k, steps):
-    S = []  # Seed Set inizialmente vuoto
-    for _ in range(k):  # Ripeti k volte, dove k è la dimensione del Seed Set
-        node_id = G.GetRndNId()  # Selezione casuale di un nodo iniziale
-        visited = set()  # Insieme dei nodi visitati durante il random walk
-        for _ in range(steps):  # Ripeti steps volte, dove steps è il numero di passi del random walk
-            visited.add(node_id)  # Aggiungi l'ID del nodo corrente all'insieme dei visitati
+def random_walk(G, k, steps):
+    # k è la dimensione del Seed Set
+    # Steps è il numero di passi del random walk
+    S = []  
+    
+    for _ in range(k):  
+        node_id = G.GetRndNId()  # Nodo random iniziale
+        visited = set()
+
+        for _ in range(steps):  
+            visited.add(node_id)  # Nodo corrente è visited
 
             node = G.GetNI(node_id)
-            neighbors = [node.GetOutNId(e) for e in range(node.GetOutDeg())]  # Ottieni gli ID dei nodi vicini
-            if not neighbors:
-                break  # Se il nodo non ha vicini, termina il random walk
+            neighbors = [node.GetOutNId(e) for e in range(node.GetOutDeg())]  # Salva i vicini del nodo corrente
+            
+            if not neighbors: # Se il nodo non ha vicini, break
+                break  
+            
+            unvisited_neighbors = [n for n in neighbors if n not in visited]  # Filtra chi sono i vicini non visitati
+            if not unvisited_neighbors: # Se non ci sono vicini non visitati, break
+                break  
 
-            node_id = random.choice(neighbors)  # Scegli un ID di nodo vicino casuale come prossimo nodo
+            node_id = random.choice(unvisited_neighbors)  # Sceglie un vicino casuale non visitato come prossimo nodo
 
-        S.append(node_id)  # Aggiungi l'ultimo nodo visitato al Seed Set
+        S.append(node_id) 
 
     return S
 
