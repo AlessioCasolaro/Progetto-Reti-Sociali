@@ -335,39 +335,37 @@ def tts(G,k):
     while Grafo.GetNodes() != 0:
         deletedNode = None
         for node in Grafo.Nodes():
-            if thresholdNodes.get(node.GetId()) == 0:
-                for neighbor in node.GetOutEdges():
+            if thresholdNodes.get(node.GetId()) == 0: # Caso in cui il nodo ha threshold 0
+                for neighbor in node.GetOutEdges(): # Ciclo sui vicini del nodo
                     thresholdNodes[neighbor] = (
-                        thresholdNodes[neighbor] - 1
-                        if thresholdNodes[neighbor] - 1 > 0
+                        thresholdNodes[neighbor] - 1 # Decremento il threshold del vicino se maggiore di 0
+                        if thresholdNodes[neighbor] - 1 > 0 
                         else 0
                     )
-                deletedNode = node.GetId()
-                Grafo.DelNode(deletedNode)
+                deletedNode = node.GetId() 
+                Grafo.DelNode(deletedNode) # Elimino il nodo dal grafo
             else:
-                if node.GetOutDeg() < thresholdNodes[node.GetId()]:
-                    S.append(node.GetId())
+                if node.GetOutDeg() < thresholdNodes[node.GetId()]: # Se il grado del nodo è minore della threshold
+                    S.append(node.GetId()) # Aggiungo il nodo al seedset
                     for neighbor in node.GetOutEdges():
                         thresholdNodes[neighbor] = (
-                            thresholdNodes[neighbor] - 1
+                            thresholdNodes[neighbor] - 1 # Decremento il threshold del vicino se maggiore di 0
                             if thresholdNodes[neighbor] - 1 > 0
                             else 0
                         )
                     deletedNode = node.GetId()
-                    Grafo.DelNode(deletedNode)
-        if deletedNode is None:
+                    Grafo.DelNode(deletedNode) # Elimino il nodo dal grafo
+        if deletedNode is None: # Se non ho eliminato nessun nodo allora prendo il nodo con il ratio più grande
             max_ratio = -1
             for v in Grafo.Nodes():
-                ratio = thresholdNodes[v.GetId()] / (v.GetOutDeg() * v.GetOutDeg() + 1)
+                ratio = thresholdNodes[v.GetId()] / (v.GetOutDeg() * v.GetOutDeg() + 1) # Calcolo il ratio
                 if ratio > max_ratio:
                     max_ratio = ratio
                     max_ratio_node = v.GetId()
-                    Grafo.DelNode(max_ratio_node)
+                    Grafo.DelNode(max_ratio_node) # Elimino il nodo dal grafo
                     
     # Prendi i primi k nodi all'interno di S
-    #print("PRIMA " + str(S))
     S = S[:k]
-    #print("\n\nDOPO " + str(S))
     return S
 
 
