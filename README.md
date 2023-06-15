@@ -41,9 +41,9 @@ Una signed network può essere modellata attraverso un grafo non direzionato $G
 
   
 
-* $(u,v)∈E^+$ significa che c’è una interazione positiva tra u e v 
+* $(u,v)∈E^+$ significa che c’è un'interazione positiva tra u e v 
 
-* $(u,v)∈E^-$ significa che c’è una interazione negativa tra u e v
+* $(u,v)∈E^-$ significa che c’è un'interazione negativa tra u e v
 
   
 
@@ -57,7 +57,7 @@ L'obiettivo di questo progetto è stato:
 
   
 
-A partire da un grafo $G=(V, E)$, fissato una threshold function costante, un intero k e data una distribuzione di probabilità associata agli archi di G siamo andati a:
+A partire da un grafo $G=(V, E)$, fissata una threshold function costante, un intero k e data una distribuzione di probabilità associata agli archi di G siamo andati a:
 
   
 
@@ -392,8 +392,8 @@ Tutto ciò viene ripetuto 10 volte per poi calcolare la media della size dell’
 
 
 Dall'output ricavato possiamo notare che l'aumento di un numero relativamente piccolo nel numero di nodi nel seedset ha portato ad un aumento significativo dei nodi infetti, visibile nel passaggio da un seedset di 50 a 100 nodi che è riuscito a portare all'aumento di oltre 500 nodi infetti.
-Successivamente l'aumento dei nodi infetti sembra diminuire all'aumentare del seedset, infatti l'aumento da 200 a 300 nodi ha causato soltanto 183 nodi infetti, mentre l'aumento da 300 a 400 nodi ha portato a 88 nodi infetti.
-Infine, si può notare che l'aumento del seedset ha un impatto limitato sul numero di nodi infetti, infatti, l'aumento da 400 a 500 nodi nel seedset ha portato a un aumento di soli 97 nodi infetti.
+Successivamente l'aumento dei nodi infetti sembra diminuire all'aumentare del seedset, infatti l'incremento da 200 a 300 nodi ha causato soltanto un aumento di 183 nodi infetti, mentre l'aumento da 300 a 400 nodi ha portato a una differenza di 88 nodi infetti.
+Infine, si può notare che l'incremento del seedset ha un impatto limitato sul numero di nodi infetti, infatti, la differenza tra il seedset da 400 nodi con quello da 500 ha portato a un incremento di soli 97 nodi infetti.
 
 ## Random Walk
 ![Random Walk](/grafici/randomWalk.png)
@@ -410,8 +410,8 @@ Infine, si può notare che l'aumento del seedset ha un impatto limitato sul nume
 | 500     | 1908    |
 
 
-Dall'output ricavato possiamo notare che c'è stato un aumento significativo di nodi infetti ad esempio nel passaggio da un seedset di 100 a 200 nodi, causando un aumento di più di 450 nodi. E' il punto in cui l'influenza nella rete si comincia a diffondere più rapidamente.
-Dopo un certo punto, l'aumento del seedset ha avuto un inpatto meno significativo sul numero di nodi infetti. Ad esempio, l'aumento da 400 a 500 nodi nel seedset ha portato ad un aumento di soli 137 nodi.
+Dall'output ricavato possiamo notare che c'è stato un aumento significativo di nodi infetti ad esempio il passaggio da un seedset di 100 a 200 nodi ha causato un incremento di più di 450 nodi. E' il punto in cui l'influenza nella rete si comincia a diffondere più rapidamente.
+Dopo un certo punto, l'aumento del seedset ha avuto un inpatto meno significativo sul numero di nodi infetti. Ad esempio, l'incremento da 400 a 500 nodi nel seedset ha portato ad una differenza di soli 137 nodi.
 
 Tuttavia, l'algoritmo Random Walk può essere influenzato dalla configurazione iniziale del cammino casuale e quindi potrebbe non sempre selezionare i nodi più influenti in modo ottimale.
 
@@ -430,12 +430,12 @@ Tuttavia, l'algoritmo Random Walk può essere influenzato dalla configurazione i
 | 500     | 1533    |
 
 
-Dall'output ricavato possiamo notare che un aumento di infetti, in relazione ad un aumento "piccolo" di seedset si è verificato con il passaggio da 50 a 100 nodi iniziali, infatti tale passaggio è riuscito a causare un aumento di 94 nodi infetti.
-Rispetto agli algoritmi precedenti l'aumento dei nodi infetti rispetto al numero di noodi nel seedset è più contenuto.
+Dall'output ricavato possiamo notare che un aumento di infetti, in relazione ad un lieve incremento della grandezza del seedset si è verificato con il passaggio da 50 a 100 nodi iniziali, infatti tale passaggio è riuscito a causare un aumento di 94 nodi infetti.
+Rispetto agli algoritmi precedenti, l'incremento di nodi infetti, rispetto al numero di nodi nel seedset è più contenuto.
 
 
 # Conclusioni
-In conclusione, andando a valutare i risultati ottenuti, l'algoritmo Seeds greedy difference max sembra essere il migliore tra i tre in termini di capacità di diffusione dell'influenza, infatti, esso ha mostrato un aumento significativo e progressivo dei nodi infetti all'aumentare del seedset. 
+In conclusione, andando a valutare i risultati ottenuti, l'algoritmo Seeds greedy difference max sembra essere il migliore tra i tre in termini di capacità di diffusione dell'influenza, infatti, esso ha mostrato un incremento significativo e progressivo dei nodi infetti all'aumentare della grandezza del seedset. 
 Bisogna però considerare che la scelta dell'algoritmo migliore dipende anche dalle specifiche caratteristiche della rete e dagli obiettivi desiderati.
 
 ## **References**
