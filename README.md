@@ -109,7 +109,7 @@ La rete ha le seguenti caratteristiche:
 
 * Triangoli: 48285.
 
-  
+![Dataset](/grafici/grafo.png)
 
 # Dettagli implementativi
 
@@ -290,6 +290,13 @@ Durante il random walk, i nodi vengono visitati in base alle connessioni nel gra
 
 L'approccio del random walk può essere utile in situazioni in cui si desidera selezionare nodi che potrebbero essere influenti anche in parti del grafo che risultano meno connesse o meno evidenti del grafo.
 
+Pregi:
+- Semplicità: L'algoritmo Random Walk è relativamente semplice da implementare e comprendere.
+- Capacità di diffusione: L'algoritmo può casualmente selezionare dei nodi che risultano più influenti e quindi che hanno una maggiore capacità di diffondere l'influenza attraverso la rete.
+
+Difetti:
+- Dipendenza dal cammino casuale: L'algoritmo ovviamente si basa su un cammino casuale per selezionare i nodi del seedset, il che potrebbe non sempre essere la scelta più ottimale.
+
 ```
 def random_walk(G, k, steps):
     # k è la dimensione del Seed Set
@@ -372,13 +379,64 @@ Tutto ciò viene ripetuto 10 volte per poi calcolare la media della size dell’
 # Risultati
 ## Seeds Greedy Difference Max
 ![Seeds Greedy Difference Max](/grafici/seeds_greedy_difference_max.png)
+| Seedset | Infetti |
+|---------|---------|
+| 12      | 417     |
+| 25      | 517     |
+| 50      | 814     |
+| 100     | 1334    |
+| 200     | 1599    |
+| 300     | 1782    |
+| 400     | 1870    |
+| 500     | 1967    |
 
-## Target Set Selection
-![Target Set Selection](/grafici/tts.png)
+
+Dall'output ricavato possiamo notare che l'aumento di un numero relativamente piccolo nel numero di nodi nel seedset ha portato ad un aumento significativo dei nodi infetti, visibile nel passaggio da un seedset di 50 a 100 nodi che è riuscito a portare all'aumento di oltre 500 nodi infetti.
+Successivamente l'aumento dei nodi infetti sembra diminuire all'aumentare del seedset, infatti l'aumento da 200 a 300 nodi ha causato soltanto 183 nodi infetti, mentre l'aumento da 300 a 400 nodi ha portato a 88 nodi infetti.
+Infine, si può notare che l'aumento del seedset ha un impatto limitato sul numero di nodi infetti, infatti, l'aumento da 400 a 500 nodi nel seedset ha portato a un aumento di soli 97 nodi infetti.
 
 ## Random Walk
 ![Random Walk](/grafici/randomWalk.png)
 
+| Seedset | Infetti |
+|---------|---------|
+| 12      | 28      |
+| 25      | 149     |
+| 50      | 520     |
+| 100     | 756     |
+| 200     | 1208    |
+| 300     | 1510    |
+| 400     | 1771    |
+| 500     | 1908    |
+
+
+Dall'output ricavato possiamo notare che c'è stato un aumento significativo di nodi infetti ad esempio nel passaggio da un seedset di 100 a 200 nodi, causando un aumento di più di 450 nodi. E' il punto in cui l'influenza nella rete si comincia a diffondere più rapidamente.
+Dopo un certo punto, l'aumento del seedset ha avuto un inpatto meno significativo sul numero di nodi infetti. Ad esempio, l'aumento da 400 a 500 nodi nel seedset ha portato ad un aumento di soli 137 nodi.
+
+Tuttavia, l'algoritmo Random Walk può essere influenzato dalla configurazione iniziale del cammino casuale e quindi potrebbe non sempre selezionare i nodi più influenti in modo ottimale.
+
+## Target Set Selection
+![Target Set Selection](/grafici/tts.png)
+
+| Seedset | Infetti |
+|---------|---------|
+| 12      | 18      |
+| 25      | 94      |
+| 50      | 263     |
+| 100     | 357     |
+| 200     | 820     |
+| 300     | 1002    |
+| 400     | 1170    |
+| 500     | 1533    |
+
+
+Dall'output ricavato possiamo notare che un aumento di infetti, in relazione ad un aumento "piccolo" di seedset si è verificato con il passaggio da 50 a 100 nodi iniziali, infatti tale passaggio è riuscito a causare un aumento di 94 nodi infetti.
+Rispetto agli algoritmi precedenti l'aumento dei nodi infetti rispetto al numero di noodi nel seedset è più contenuto.
+
+
+# Conclusioni
+In conclusione, andando a valutare i risultati ottenuti, l'algoritmo Seeds greedy difference max sembra essere il migliore tra i tre in termini di capacità di diffusione dell'influenza, infatti, esso ha mostrato un aumento significativo e progressivo dei nodi infetti all'aumentare del seedset. 
+Bisogna però considerare che la scelta dell'algoritmo migliore dipende anche dalle specifiche caratteristiche della rete e dagli obiettivi desiderati.
 
 ## **References**
 

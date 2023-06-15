@@ -4,7 +4,7 @@ import snap
 import random
 from multiprocessing import Pool
 
-threshold = 2
+threshold = 3
 G = snap.LoadEdgeList(snap.PUNGraph, "ca-GrQc.txt", 0, 1) # Caricamento del grafo
 
 def random_threshold():
@@ -60,9 +60,11 @@ def main():
     print("Numero di archi positivi: ", len(edgePositivi))
     print("Numero di archi negativi: ", len(edgeNegativi))
 
+    #snap.DrawGViz(G, snap.gvlDot, "outputgraph.png", "Undirected Graph")
+
     #parallel_seeds_greedy_difference_max(seedset_list,edgePositivi, edgeNegativi, threshold)
     #parallel_randomWalk(seedset_list, edgePositivi, edgeNegativi)
-    parallel_tts(seedset_list,edgePositivi, edgeNegativi)
+    #parallel_tts(seedset_list,edgePositivi, edgeNegativi)
     
         
 #################
